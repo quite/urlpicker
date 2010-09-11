@@ -51,7 +51,7 @@ ignored).
 Escape exits this mode and removes all overlay windows, without doing
 anything.
 
-Enter launches the URL associated with the number that has been typed, of
+Enter launches the URL associated with the number that has been typed, if
 that number matches one of the URL labels.  Otherwise, nothing happens.
 
 When typing numbers, if the number typed so far uniquely identifies a

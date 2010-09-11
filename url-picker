@@ -26,7 +26,9 @@ sub on_user_command {
 	  my $col = $-[0];
 	  my $href = $&;
           $num++;
-	  my $overlay = $self->overlay($col, $row, $self->strwidth($num), 1, urxvt::OVERLAY_RSTYLE, 0);
+	  my $overlay = $self->overlay(
+            $col, $row, $self->strwidth($num), 1, urxvt::OVERLAY_RSTYLE, 0
+          );
 	  $overlay->set(0,0,$num);
 	  $labels->{$num} = $overlay;
 	  $hrefs->{$num} = $href;
@@ -47,7 +49,9 @@ sub on_user_command {
      }
      else {
        my $url_picker = {};
-       $url_picker->{prompt} = $self->overlay(0,-1,8,1,urxvt::OVERLAY_RSTYLE, 0);
+       $url_picker->{prompt} = $self->overlay(
+         0, -1, 8, 1, urxvt::OVERLAY_RSTYLE, 0
+       );
        $url_picker->{prompt}->set(0,0,"Follow:");
        $url_picker->{labels} = $labels;
        $url_picker->{hrefs} = $hrefs;
@@ -93,7 +97,9 @@ sub on_key_press {
 
 sub update {
   my ($self, $p) = @_;
-  $p->{typing} = $self->overlay(8,-1,length($p->{buffer}),1,urxvt::DEFAULT_RSTYLE,0);
+  $p->{typing} = $self->overlay(
+    8, -1, length($p->{buffer}), 1, urxvt::DEFAULT_RSTYLE, 0
+  );
   $p->{typing}->set(0,0,$p->{buffer});
   my $ndx = 0;
   my $labels = $p->{labels};

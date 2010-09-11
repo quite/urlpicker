@@ -6,9 +6,11 @@ my $url =
    qr{
       (?:https?://|ftp://|news://|mailto:|file://|\bwww\.)
       [a-zA-Z0-9\-\@;\/?:&=%\$_.+!*\x27,~#]*
-      (
-         \([a-zA-Z0-9\-\@;\/?:&=%\$_.+!*\x27,~#]*\)| # Allow a pair of matched parentheses
-         [a-zA-Z0-9\-\@;\/?:&=%\$_+*~]  # exclude some trailing characters (heuristic)
+      ( 
+         # Allow a pair of matched parentheses
+         \([a-zA-Z0-9\-\@;\/?:&=%\$_.+!*\x27,~#]*\)|  
+         # exclude some trailing characters (heuristic)
+         [a-zA-Z0-9\-\@;\/?:&=%\$_+*~]
       )+
    }x;
 
@@ -109,7 +111,8 @@ sub update {
   my @matches;
   while (++$ndx <= $size) {
     my $overlay = $labels->{$ndx};
-    if (($len == 0) || (($len <= length($ndx)) && (substr($ndx,0,$len) eq $p->{buffer}))) {
+    if (($len == 0) ||
+        (($len <= length($ndx)) && (substr($ndx,0,$len) eq $p->{buffer}))) {
       $overlay->show;
       unshift @matches,$hrefs->{$ndx};
     } else {

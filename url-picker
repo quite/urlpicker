@@ -24,15 +24,15 @@ sub on_user_command {
      while ($row++ < $self->nrow) {
        my $text = $self->ROW_t($row);
        while ($text =~ /$url/g) {
-	  my $col = $-[0];
-	  my $href = $&;
+          my $col = $-[0];
+          my $href = $&;
           $num++;
-	  my $overlay = $self->overlay(
+          my $overlay = $self->overlay(
             $col, $row, $self->strwidth($num), 1, urxvt::OVERLAY_RSTYLE, 0
           );
-	  $overlay->set(0,0,$num);
-	  $labels->{$num} = $overlay;
-	  $hrefs->{$num} = $href;
+          $overlay->set(0,0,$num);
+          $labels->{$num} = $overlay;
+          $hrefs->{$num} = $href;
        }
      }
 
@@ -41,12 +41,12 @@ sub on_user_command {
        $ermsg->set(0,0,"url-picker: no URLs found on screen");
        $self->{ermsg} = $ermsg;
        $self->{timer} = urxvt::timer
-		          ->new
-			  ->after (5)
-			  ->cb (sub {
-			  	      $self->{ermsg} = ();
-				      $self->{timer} = ();
-				    });
+                          ->new
+                          ->after (5)
+                          ->cb (sub {
+                                      $self->{ermsg} = ();
+                                      $self->{timer} = ();
+                                    });
      }
      else {
        my $url_picker = {};
@@ -72,10 +72,10 @@ sub on_key_press {
    my ($self, $event, $keysym) = @_;
    my $p = $self->{url_picker};
    if ($p) {
-     if ($keysym == 0xff1b) {		# escape
+     if ($keysym == 0xff1b) {           # escape
        $self->screen_cur($p->{crow},$p->{ccol});
        $self->{url_picker} = ();
-     } elsif ($keysym == 0xff08) {	# backspace
+     } elsif ($keysym == 0xff08) {      # backspace
        if (length($p->{buffer}) > 0) {
          $p->{buffer} = substr($p->{buffer},0,-1);
          $self->update($p);
@@ -83,12 +83,12 @@ sub on_key_press {
      } elsif (($keysym >= 48) && ($keysym <= 57)) {
        $p->{buffer} = $p->{buffer} . ($keysym - 48);
        $self->update($p);
-     } elsif ($keysym == 0xff0d) {	# CR
+     } elsif ($keysym == 0xff0d) {      # CR
        my $num = $p->{buffer};
        my $hrefs = $p->{hrefs};
        if (($num > 0) && ($num <= $p->{num})) {
-	 my $href = $hrefs->{$num};
-	 $self->launch($href);
+         my $href = $hrefs->{$num};
+         $self->launch($href);
        }
      }
      return 1;

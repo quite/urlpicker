@@ -1,0 +1,65 @@
+NAME	url-picker
+
+SITE	http://chipstips.com/?tag=plurlpicker
+	http://bitbucket.org/sterlingcamden/urlpicker
+
+AUTHOR	Chip Camden
+
+DATE	September, 2010
+
+DESCRIPTION
+
+Perl extension for rxvt-unicode (aka urxvt) to enable quick keyboard
+navigation of URLs shown in the terminal window.  The design is similar
+to the 'follow hints' feature of Vimperator
+(http://vimperator.org/vimperator).
+
+INSTALLATION
+
+See the man page for urxvtperl(3) for a full discussion of Perl
+extensions.  Enable this extension using one of the methods documented
+there.  For instance, you could place the script url-picker in
+/usr/local/lib/urxvt/perl, then add the following to .Xdefaults:
+
+URxvt.perl-ext: default,matcher,url-picker
+URxvt.keysym.C-0xff0d:    perl:url-picker
+
+I find that url-picker works well in combination with matcher, but you
+can leave out the latter if you don't care for it.  The above enables, in
+addition to the default behavior, the matcher extension and url-picker.
+It directs the key combination of ctrl+enter to call the on_user_command
+function of url-picker.
+
+OPERATION
+
+If no URLs are visible on the screen, url-picker just pops up an overlay
+window that warns "no URLs found on screen".  The overlay disappears
+after five seconds, but the terminal is immediately operable.
+
+If the terminal display contains only one URL, that URL is launched to
+the browser.  The browser is determined by X resources
+url-picker.launcher if defined, otherwise URxvt.urlLauncher.  If neither
+of these are defined, the 'sensible-browser' is used.  The URL will be
+passed as the first argument.
+
+If more than one URL is visible in the terminal window, url-picker places
+numbered labels over the first characters of each URL on the screen.  A
+prompt "Follow: " appears at the bottom of the terminal window, at which
+you can type only numbers, backspace, enter, or escape (all other input is
+ignored).
+
+Escape exits this mode and removes all overlay windows, without doing
+anything.
+
+Enter launches the URL associated with the number that has been typed, of
+that number matches one of the URL labels.  Otherwise, nothing happens.
+
+When typing numbers, if the number typed so far uniquely identifies a
+URL, that URL is launched immediately.  Otherwise, the labels that do not
+match the numbers typed so far will be hidden.
+
+The backspace key erases the last number typed, if there is one.
+
+When a URL is launched, all overlay windows are removed and the cursor
+position is restored to where it was in the terminal window before
+url-picker was invoked.

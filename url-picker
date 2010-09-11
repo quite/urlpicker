@@ -1,0 +1,150 @@
+#! perl
+
+# Author: Chip Camden <sterling@camdensoftware.com>
+
+my $url =
+   qr{
+      (?:https?://|ftp://|news://|mailto:|file://|\bwww\.)
+      [a-zA-Z0-9\-\@;\/?:&=%\$_.+!*\x27,~#]*
+      (
+         \([a-zA-Z0-9\-\@;\/?:&=%\$_.+!*\x27,~#]*\)| # Allow a pair of matched parentheses
+         [a-zA-Z0-9\-\@;\/?:&=%\$_+*~]  # exclude some trailing characters (heuristic)
+      )+
+   }x;
+
+sub on_user_command {
+   my ($self, $cmd) = @_;
+   if($cmd =~ s/^url-picker\b//) {
+     my $labels = {}; 
+     my $hrefs = {};
+     my $row = -1;
+     my $num = 0;
+     while ($row++ < $self->nrow) {
+       my $text = $self->line($row)->t;
+       while ($text =~ /$url/g)
+       {
+	  my $col = $-[0];
+	  my $href = $&;
+          $num++;
+	  my $overlay = $self->overlay($col, $row, $self->strwidth($num), 1, urxvt::OVERLAY_RSTYLE, 0);
+	  $overlay->set(0,0,$num);
+	  $labels->{$num} = $overlay;
+	  $hrefs->{$num} = $href;
+       }
+     }
+
+     if ($num < 1) {
+       my $ermsg = $self->overlay(0,-1,35,1,urxvt::OVERLAY_RSTYLE,0);
+       $ermsg->set(0,0,"url-picker: no URLs found on screen");
+       $self->{ermsg} = $ermsg;
+       $self->{timer} = urxvt::timer
+		          ->new
+			  ->after (5)
+			  ->cb (sub {
+			  	      $self->{ermsg} = ();
+				      $self->{timer} = ();
+				    });
+     }
+     else {
+       my $url_picker = {};
+       $url_picker->{prompt} = $self->overlay(0,-1,8,1,urxvt::OVERLAY_RSTYLE, 0);
+       $url_picker->{prompt}->set(0,0,"Follow:");
+       $url_picker->{labels} = $labels;
+       $url_picker->{hrefs} = $hrefs;
+       $url_picker->{num} = $num;
+       $url_picker->{buffer} = '';
+       my ($crow,$ccol) = $self->screen_cur;
+       $url_picker->{crow} = $crow;
+       $url_picker->{ccol} = $ccol;
+       $self->{url_picker} = $url_picker;
+       $self->update($url_picker);
+     }
+   }
+   ()
+}
+
+sub on_key_press {
+   my ($self, $event, $keysym) = @_;
+   my $p = $self->{url_picker};
+   if ($p) {
+     if ($keysym == 0xff1b) {		# escape
+       $self->screen_cur($p->{crow},$p->{ccol});
+       $self->{url_picker} = ();
+     } elsif ($keysym == 0xff08) {	# backspace
+       if (length($p->{buffer}) > 0) {
+         $p->{buffer} = substr($p->{buffer},0,-1);
+         $self->update($p);
+       }
+     } elsif (($keysym >= 48) && ($keysym <= 57)) {
+       $p->{buffer} = $p->{buffer} . ($keysym - 48);
+       $self->update($p);
+     } elsif ($keysym == 0xff0d) {	# CR
+       my $num = $p->{buffer};
+       my $hrefs = $p->{hrefs};
+       if (($num > 0) && ($num <= $p->{num})) {
+	 my $href = $hrefs->{$num};
+	 $self->launch($href);
+       }
+     }
+     return 1;
+   }
+   ()
+}
+
+sub update {
+  my ($self, $p) = @_;
+  $p->{typing} = $self->overlay(8,-1,length($p->{buffer}),1,urxvt::DEFAULT_RSTYLE,0);
+  $p->{typing}->set(0,0,$p->{buffer});
+  my $ndx = 0;
+  my $labels = $p->{labels};
+  my $hrefs = $p->{hrefs};
+  my $len = length($p->{buffer});
+  my $size = $p->{num};
+  my @matches;
+  while (++$ndx <= $size) {
+    my $overlay = $labels->{$ndx};
+    if (($len == 0) || (($len <= length($ndx)) && (substr($ndx,0,$len) eq $p->{buffer}))) {
+      $overlay->show;
+      unshift @matches,$hrefs->{$ndx};
+    } else {
+      $overlay->hide;
+    }
+  }
+  if (scalar(@matches) == 1) {
+    $self->launch(@matches[0]);
+  } else {
+    $self->screen_cur($self->nrow,8+$len);
+  }
+}
+
+sub launch {
+  my ($self, $href) = @_;
+  my $launcher = $self->{launcher};
+  $self->exec_async ($launcher,$href);
+  my $p = $self->{url_picker};
+  $self->screen_cur($p->{crow},$p->{ccol});
+  $self->{url_picker} = ();
+}
+
+sub on_key_release {
+   my ($self, $event, $keysym) = @_;
+   $self->{url_picker};
+}
+
+sub my_resource {
+   my ($self) = @_;
+   $self->x_resource ("$self->{name}.$_[0]");
+}
+
+sub on_start {
+   my ($self) = @_;
+
+   ($self->{name} = __PACKAGE__) =~ s/.*:://;
+   $self->{name} =~ tr/_/-/;
+   $self->{launcher} = $self->my_resource("launcher") ||
+                      $self->x_resource("urlLauncher") ||
+                      "sensible-browser";
+   $self->{url_picker} = ();
+}
+
+# vim:set sw=3 sts=3 et:

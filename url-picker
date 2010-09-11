@@ -125,11 +125,11 @@ sub update {
 
 sub launch {
   my ($self, $href) = @_;
-  my $launcher = $self->{launcher};
-  $self->exec_async ($launcher,$href);
   my $p = $self->{url_picker};
   $self->screen_cur($p->{crow},$p->{ccol});
   $self->{url_picker} = ();
+  my $launcher = $self->{launcher};
+  $self->exec_async ($launcher,$href);
 }
 
 sub on_key_release {

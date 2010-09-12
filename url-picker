@@ -16,7 +16,7 @@ my $url =
 
 sub on_user_command {
    my ($self, $cmd) = @_;
-   if($cmd =~ s/^url-picker\b//) {
+   if ($cmd =~ s/^url-picker\b//) {
      my $labels = {}; 
      my $hrefs = {};
      my $row = -1;

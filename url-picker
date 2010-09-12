@@ -47,8 +47,7 @@ sub on_user_command {
                                       $self->{ermsg} = ();
                                       $self->{timer} = ();
                                     });
-     }
-     else {
+     } else {
        my $url_picker = {};
        $url_picker->{prompt} = $self->overlay(
          0, -1, 8, 1, urxvt::OVERLAY_RSTYLE, 0

@@ -19,9 +19,8 @@ sub on_user_command {
   if ($cmd =~ s/^url-picker\b//) {
     my $labels = {}; 
     my $hrefs = {};
-    my $row = -1;
     my $num = 0;
-    while ($row++ < $self->nrow) {
+    for my $row (0..$self->nrow) {
       my $text = $self->ROW_t($row);
       while ($text =~ /$url/g) {
         my $col = $-[0];

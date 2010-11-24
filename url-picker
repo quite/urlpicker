@@ -20,23 +20,44 @@ sub on_user_command {
     my $labels = {}; 
     my $hrefs = {};
     my $num = 0;
-    for my $row (0..$self->nrow) {
-      my $text = $self->ROW_t($row);
-      while ($text =~ /$url/g) {
-        my $col = $-[0];
-        my $href = $&;
-        $num++;
-        my $overlay = $self->overlay(
-          $col, $row, $self->strwidth($num), 1, urxvt::OVERLAY_RSTYLE, 0
-        );
-        $overlay->set(0,0,$num);
-        $labels->{$num} = $overlay;
-        $hrefs->{$num} = $href;
+    my $row = 0;
+    my $base_col = 0;
+    my $text = '';
+    my $label_urls = sub {
+                       while ($text =~ /$url/g) {
+                         my $col = $-[0] + $base_col;
+                         my $href = $&;
+                         $num++;
+                         my $overlay = $self->overlay(
+                           $col, $row, $self->strwidth($num), 1, urxvt::OVERLAY_RSTYLE, 0
+                         );
+                         $overlay->set(0,0,$num);
+                         $labels->{$num} = $overlay;
+                         $hrefs->{$num} = $href;
+                       }
+                     };
+    my ($brow, $bcol) = $self->selection_beg();
+    my ($erow, $ecol) = $self->selection_end();
+    my $issel = ($ecol > $bcol) || ($erow > $brow);
+    if ($issel) {         # restrict to selection if one exists
+      ($row, $base_col) = ($brow, $bcol);
+      for (split(/\n/, $self->selection())) {
+        $text = $_;
+        $label_urls->();
+        $base_col = 0;
+        $row++;
+      }
+    } else {            # no selection, use visible terminal
+      for (0..$self->nrow) {
+        $row = $_;
+        $text = $self->ROW_t($row);
+        $label_urls->();
       }
     }
 
     if ($num < 1) {
-      $self->status_msg("url-picker: no URLs found on screen");
+      my $desc = $issel ? "in selected text" : "on visible screen";
+      $self->status_msg("url-picker: no URLs found $desc");
     } else {
       my $url_picker = {};
       $url_picker->{prompt} = $self->overlay(

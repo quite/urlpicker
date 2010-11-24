@@ -32,20 +32,24 @@ function of url-picker.
 
 OPERATION
 
-If no URLs are visible on the screen, url-picker just pops up an overlay
-window that warns "no URLs found on screen".  The overlay disappears
-after five seconds, but the terminal is immediately operable.
+If a portion of the terminal text has been marked for selection, then the
+search for URLs will be restricted to that region.  Otherwise, the visible 
+text of the termainl will be used.
 
-If the terminal display contains only one URL, that URL is launched to
-the browser.  The browser is determined by X resources
-url-picker.launcher if defined, otherwise URxvt.urlLauncher.  If neither
-of these are defined, the 'sensible-browser' is used.  The URL will be
-passed as the first argument.
+If no URLs are found,  url-picker just pops up an overlay window that
+warns "no URLs found on visible screen" or "no URLs found in selected
+text".  The overlay disappears after five seconds, but the terminal is
+immediately operable.
 
-If more than one URL is visible in the terminal window, url-picker places
-numbered labels over the first characters of each URL on the screen.  A
-prompt "Follow: " appears at the bottom of the terminal window, at which
-you can type only numbers, backspace, enter, or escape (all other input is
+If the region contains only one URL, that URL is launched to the browser.
+The browser is determined by X resources url-picker.launcher if defined,
+otherwise URxvt.urlLauncher.  If neither of these are defined, the
+'sensible-browser' is used.  The URL will be passed as the first argument.
+
+If more than one URL available in the region, url-picker places numbered
+labels over the first characters of each URL on the screen.  A prompt
+"Follow: " appears at the bottom of the terminal window, at which you
+can type only numbers, backspace, enter, or escape (all other input is
 ignored).
 
 Escape exits this mode and removes all overlay windows, without doing

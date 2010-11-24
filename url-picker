@@ -36,16 +36,7 @@ sub on_user_command {
     }
 
     if ($num < 1) {
-      my $ermsg = $self->overlay(0,-1,35,1,urxvt::OVERLAY_RSTYLE,0);
-      $ermsg->set(0,0,"url-picker: no URLs found on screen");
-      $self->{ermsg} = $ermsg;
-      $self->{timer} = urxvt::timer
-                         ->new
-                         ->after (5)
-                         ->cb (sub {
-                                     $self->{ermsg} = ();
-                                     $self->{timer} = ();
-                                   });
+      $self->status_msg("url-picker: no URLs found on screen");
     } else {
       my $url_picker = {};
       $url_picker->{prompt} = $self->overlay(
@@ -129,7 +120,21 @@ sub launch {
   $self->screen_cur($p->{crow},$p->{ccol});
   $self->{url_picker} = ();
   my $launcher = $self->{launcher};
+  $self->status_msg($href);
   $self->exec_async ($launcher,$href);
+}
+
+sub status_msg {
+  my ($self, $msg) = @_;
+  $self->{url_picker_msg} = $self->overlay(0,-1,length($msg),1,urxvt::OVERLAY_RSTYLE,0);
+  $self->{url_picker_msg}->set(0,0,$msg);
+  $self->{url_picker_timer} = urxvt::timer
+                            ->new
+                            ->after (5)
+                            ->cb (sub {
+                                     $self->{url_picker_msg} = ();
+                                     $self->{url_pickertimer} = ();
+                                   });
 }
 
 sub on_key_release {

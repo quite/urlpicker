@@ -62,4 +62,5 @@ The backspace key erases the last number typed, if there is one.
 
 When a URL is launched, all overlay windows are removed and the cursor
 position is restored to where it was in the terminal window before
-url-picker was invoked.
+url-picker was invoked.  The url launched is displayed on the bottom
+row of the terminal window for five seconds.

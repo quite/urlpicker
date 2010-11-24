@@ -37,7 +37,7 @@ search for URLs will be restricted to that region.  Otherwise, the visible
 text of the termainl will be used.
 
 If no URLs are found,  url-picker just pops up an overlay window that
-warns "no URLs found on visible screen" or "no URLs found in selected
+warns "no URLs found on visible screen" or "no URLs found in visible selected
 text".  The overlay disappears after five seconds, but the terminal is
 immediately operable.
 
@@ -46,7 +46,7 @@ The browser is determined by X resources url-picker.launcher if defined,
 otherwise URxvt.urlLauncher.  If neither of these are defined, the
 'sensible-browser' is used.  The URL will be passed as the first argument.
 
-If more than one URL available in the region, url-picker places numbered
+If more than one URL is available in the region, url-picker places numbered
 labels over the first characters of each URL on the screen.  A prompt
 "Follow: " appears at the bottom of the terminal window, at which you
 can type only numbers, backspace, enter, or escape (all other input is

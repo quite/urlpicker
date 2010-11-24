@@ -14,6 +14,11 @@ my $url =
       )+
    }x;
 
+sub on_view_change {
+  my ($self, $offset) = @_;
+  $self->{view_offset} = $offset;
+}
+
 sub on_user_command {
   my ($self, $cmd) = @_;
   if ($cmd =~ s/^url-picker\b//) {
@@ -38,25 +43,26 @@ sub on_user_command {
                      };
     my ($brow, $bcol) = $self->selection_beg();
     my ($erow, $ecol) = $self->selection_end();
+    my $offset = $self->{view_offset} || 0;
     my $issel = ($ecol > $bcol) || ($erow > $brow);
     if ($issel) {         # restrict to selection if one exists
-      ($row, $base_col) = ($brow, $bcol);
+      ($row, $base_col) = ($brow - $offset, $bcol);
       for (split(/\n/, $self->selection())) {
         $text = $_;
-        $label_urls->();
+        $label_urls->() if $row >= 0;  # must be visible
         $base_col = 0;
         $row++;
       }
     } else {            # no selection, use visible terminal
-      for (0..$self->nrow) {
+      for (0..($self->nrow - 1)) {
         $row = $_;
-        $text = $self->ROW_t($row);
+        $text = $self->ROW_t($row + $offset);
         $label_urls->();
       }
     }
 
     if ($num < 1) {
-      my $desc = $issel ? "in selected text" : "on visible screen";
+      my $desc = $issel ? "in visible selected text" : "on visible screen";
       $self->status_msg("url-picker: no URLs found $desc");
     } else {
       my $url_picker = {};

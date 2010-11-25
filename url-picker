@@ -28,13 +28,14 @@ sub on_user_command {
     my $row = 0;
     my $base_col = 0;
     my $text = '';
+    my $label_rend = $self->get_rend("label", urxvt::OVERLAY_RSTYLE);
     my $label_urls = sub {
                        while ($text =~ /$url/g) {
                          my $col = $-[0] + $base_col;
                          my $href = $&;
                          $num++;
                          my $overlay = $self->overlay(
-                           $col, $row, $self->strwidth($num), 1, urxvt::OVERLAY_RSTYLE, 0
+                           $col, $row, $self->strwidth($num), 1, $label_rend, 0
                          );
                          $overlay->set(0,0,$num);
                          $labels->{$num} = $overlay;
@@ -67,7 +68,7 @@ sub on_user_command {
     } else {
       my $url_picker = {};
       $url_picker->{prompt} = $self->overlay(
-        0, -1, 8, 1, urxvt::OVERLAY_RSTYLE, 0
+        0, -1, 8, 1, $self->get_rend("prompt", urxvt::OVERLAY_RSTYLE), 0
       );
       $url_picker->{prompt}->set(0,0,"Follow:");
       $url_picker->{labels} = $labels;
@@ -115,7 +116,7 @@ sub on_key_press {
 sub update {
   my ($self, $p) = @_;
   $p->{typing} = $self->overlay(
-    8, -1, length($p->{buffer}), 1, urxvt::DEFAULT_RSTYLE, 0
+    8, -1, length($p->{buffer}), 1, $self->get_rend("input", urxvt::DEFAULT_RSTYLE), 0
   );
   $p->{typing}->set(0,0,$p->{buffer});
   my $ndx = 0;
@@ -153,7 +154,7 @@ sub launch {
 
 sub status_msg {
   my ($self, $msg) = @_;
-  $self->{url_picker_msg} = $self->overlay(0,-1,length($msg),1,urxvt::OVERLAY_RSTYLE,0);
+  $self->{url_picker_msg} = $self->overlay(0,-1,length($msg),1,$self->get_rend("status",urxvt::OVERLAY_RSTYLE),0);
   $self->{url_picker_msg}->set(0,0,$msg);
   $self->{url_picker_timer} = urxvt::timer
                             ->new
@@ -164,14 +165,21 @@ sub status_msg {
                                    });
 }
 
+sub get_rend {
+  my ($self, $name, $default) = @_;
+  urxvt::SET_COLOR $default,
+    $self->my_resource("$name.foregroundColor") || urxvt::GET_BASEFG $default,
+    $self->my_resource("$name.backgroundColor") || urxvt::GET_BASEBG $default;
+}
+
 sub on_key_release {
   my ($self, $event, $keysym) = @_;
   $self->{url_picker};
 }
 
 sub my_resource {
-  my ($self) = @_;
-  $self->x_resource ("$self->{name}.$_[0]");
+  my ($self, $name) = @_;
+  $self->x_resource ("$self->{name}.$name");
 }
 
 sub on_start {
@@ -182,6 +190,7 @@ sub on_start {
   $self->{launcher} = $self->my_resource("launcher") ||
                       $self->x_resource("urlLauncher") ||
                       "sensible-browser";
+  $self->status_msg($self->{launcher});
   $self->{url_picker} = ();
 }
 

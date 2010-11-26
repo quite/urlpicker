@@ -190,7 +190,6 @@ sub on_start {
   $self->{launcher} = $self->my_resource("launcher") ||
                       $self->x_resource("urlLauncher") ||
                       "sensible-browser";
-  $self->status_msg($self->{launcher});
   $self->{url_picker} = ();
 }
 

@@ -19,6 +19,11 @@ sub on_view_change {
   $self->{view_offset} = $offset;
 }
 
+sub on_scroll_back {
+  my ($self, $lines, $saved) = @_;
+  $self->{view_offset} = 0;
+}
+
 sub on_user_command {
   my ($self, $cmd) = @_;
   if ($cmd =~ s/^url-picker\b//) {

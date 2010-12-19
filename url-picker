@@ -14,16 +14,6 @@ my $url =
       )+
    }x;
 
-sub on_view_change {
-  my ($self, $offset) = @_;
-  $self->{view_offset} = $offset;
-}
-
-sub on_scroll_back {
-  my ($self, $lines, $saved) = @_;
-  $self->{view_offset} = 0;
-}
-
 sub on_user_command {
   my ($self, $cmd) = @_;
   if ($cmd =~ s/^url-picker\b//) {
@@ -49,10 +39,9 @@ sub on_user_command {
                      };
     my ($brow, $bcol) = $self->selection_beg();
     my ($erow, $ecol) = $self->selection_end();
-    my $offset = $self->{view_offset} || 0;
     my $issel = ($ecol > $bcol) || ($erow > $brow);
     if ($issel) {         # restrict to selection if one exists
-      ($row, $base_col) = ($brow - $offset, $bcol);
+      ($row, $base_col) = ($brow - $self->view_start, $bcol);
       for (split(/\n/, $self->selection())) {
         $text = $_;
         $label_urls->() if $row >= 0;  # must be visible
@@ -62,7 +51,7 @@ sub on_user_command {
     } else {            # no selection, use visible terminal
       for (0..($self->nrow - 1)) {
         $row = $_;
-        $text = $self->ROW_t($row + $offset);
+        $text = $self->ROW_t($row + $self->view_start);
         $label_urls->();
       }
     }

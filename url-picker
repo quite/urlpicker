@@ -19,6 +19,7 @@ sub on_user_command {
   if ($cmd =~ s/^url-picker\b//) {
     my $labels = {}; 
     my $hrefs = {};
+    my $rowmap = {};
     my $num = 0;
     my $row = 0;
     my $base_col = 0;
@@ -26,15 +27,27 @@ sub on_user_command {
     my $label_rend = $self->get_rend("label", urxvt::OVERLAY_RSTYLE);
     my $label_urls = sub {
                        while ($text =~ /$url/g) {
-                         my $col = $-[0] + $base_col;
+                         my $ndx = $-[0];
                          my $href = $&;
-                         $num++;
-                         my $overlay = $self->overlay(
-                           $col, $row, $self->strwidth($num), 1, $label_rend, 0
-                         );
-                         $overlay->set(0,0,$num);
-                         $labels->{$num} = $overlay;
-                         $hrefs->{$num} = $href;
+                         my $col = 0;
+                         for my $key (keys %$rowmap) {
+                           my $value = $rowmap->{$key};
+                           my ($start, $end) = @$value;
+                           if (($start <= $ndx) && ($end >= $ndx)) {
+                             $row = $key;
+                             $col = $ndx - $start;
+                             last;
+                           }
+                         }
+                         if ($row >= 0) {    # must be visible
+                            $num++;
+                            my $overlay = $self->overlay(
+                              $col, $row, $self->strwidth($num), 1, $label_rend, 0
+                            );
+                            $overlay->set(0,0,$num);
+                            $labels->{$num} = $overlay;
+                            $hrefs->{$num} = $href;
+                         }
                        }
                      };
     my ($brow, $bcol) = $self->selection_beg();
@@ -43,18 +56,21 @@ sub on_user_command {
     if ($issel) {         # restrict to selection if one exists
       ($row, $base_col) = ($brow - $self->view_start, $bcol);
       for (split(/\n/, $self->selection())) {
-        $text = $_;
-        $label_urls->() if $row >= 0;  # must be visible
+        my $start = length($text) - $base_col;
+        $text .= $_;
+        $rowmap->{$row} = [$start, (length($text)-1)];
         $base_col = 0;
         $row++;
       }
     } else {            # no selection, use visible terminal
       for (0..($self->nrow - 1)) {
         $row = $_;
-        $text = $self->ROW_t($row + $self->view_start);
-        $label_urls->();
+        my $start = length($text);
+        $text .= $self->ROW_t($row + $self->view_start);
+        $rowmap->{$row} = [$start, (length($text)-1)];
       }
     }
+    $label_urls->();
 
     if ($num < 1) {
       my $desc = $issel ? "in visible selected text" : "on visible screen";

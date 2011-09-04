@@ -26,6 +26,7 @@ sub on_user_command {
     my $text = '';
     my $label_rend = $self->get_rend("label", urxvt::OVERLAY_RSTYLE);
     my $label_urls = sub {
+                       my @overlays;
                        while ($text =~ /$url/g) {
                          my $ndx = $-[0];
                          my $href = $&;
@@ -39,15 +40,19 @@ sub on_user_command {
                              last;
                            }
                          }
-                         if ($row >= 0) {    # must be visible
-                            $num++;
-                            my $overlay = $self->overlay(
-                              $col, $row, $self->strwidth($num), 1, $label_rend, 0
-                            );
-                            $overlay->set(0,0,$num);
-                            $labels->{$num} = $overlay;
-                            $hrefs->{$num} = $href;
-                         }
+                         my @ov = ($col, $row, $href);
+                         push(@overlays, \@ov) if ($row >= 0);
+                       }
+                       @overlays = reverse @overlays if ($self->{descending});
+                       for my $ov (@overlays) {
+                         my ($col, $row, $href) = @$ov;
+                         $num++;
+                         my $overlay = $self->overlay(
+                           $col, $row, $self->strwidth($num), 1, $label_rend, 0
+                         );
+                         $overlay->set(0,0,$num);
+                         $labels->{$num} = $overlay;
+                         $hrefs->{$num} = $href;
                        }
                      };
     my ($brow, $bcol) = $self->selection_beg();
@@ -200,6 +205,7 @@ sub on_start {
   $self->{launcher} = $self->my_resource("launcher") ||
                       $self->x_resource("urlLauncher") ||
                       "sensible-browser";
+  $self->{descending} = ($self->my_resource("order") eq "descending");
   $self->{url_picker} = ();
 }
 

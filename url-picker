@@ -102,6 +102,9 @@ sub on_user_command {
 
 sub on_key_press {
   my ($self, $event, $keysym) = @_;
+  if ($self->{url_picker_msg}) {
+    $self->{url_picker_msg} = ();
+  }
   my $p = $self->{url_picker};
   if ($p) {
     if ($keysym == 0xff1b) {           # escape

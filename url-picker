@@ -107,7 +107,7 @@ sub on_key_press {
   }
   my $p = $self->{url_picker};
   if ($p) {
-    if ($keysym == 0xff1b) {           # escape
+    if ($keysym == 0xff1b || $keysym == 113) {           # escape or q
       $self->screen_cur($p->{crow},$p->{ccol});
       $self->{url_picker} = ();
     } elsif ($keysym == 0xff08) {      # backspace

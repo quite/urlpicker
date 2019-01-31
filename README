@@ -48,11 +48,11 @@ otherwise URxvt.url-launcher.  If neither of these are defined, the
 If more than one URL is available in the region, url-picker places numbered
 labels over the first characters of each URL on the screen.  A prompt
 "Follow: " appears at the bottom of the terminal window, at which you
-can type only numbers, backspace, enter, or escape (all other input is
-ignored).
+can type only numbers, backspace, enter, or escape or `q` (all other input
+is ignored).
 
-Escape exits this mode and removes all overlay windows, without doing
-anything.
+Escape (or `q`) exits this mode and removes all overlay windows, without
+doing anything.
 
 Enter launches the URL associated with the number that has been typed, if
 that number matches one of the URL labels.  Otherwise, nothing happens.

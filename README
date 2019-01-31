@@ -42,7 +42,7 @@ immediately operable.
 
 If the region contains only one URL, that URL is launched to the browser.
 The browser is determined by X resources url-picker.launcher if defined,
-otherwise URxvt.urlLauncher.  If neither of these are defined, the
+otherwise URxvt.url-launcher.  If neither of these are defined, the
 'sensible-browser' is used.  The URL will be passed as the first argument.
 
 If more than one URL is available in the region, url-picker places numbered
@@ -76,7 +76,7 @@ RESOURCES
 
 The following resources are recognized by url-picker:
 
-URxvt.urlLauncher			Default browser
+URxvt.url-launcher			Default browser
 URxvt.url-picker.input.backgroundColor	Bg color for numbers typed
 URxvt.url-picker.input.foregroundColor	Fg color for numbers typed
 URxvt.url-picker.label.backgroundColor	Bg color for numbered labels

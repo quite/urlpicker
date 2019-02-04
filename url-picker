@@ -151,7 +151,9 @@ sub update {
       $overlay->hide;
     }
   }
-  if (scalar(@matches) == 1) {
+  # Auto-launch a single url only if the launchsingle resource is true
+  # (default), or if some digits were input
+  if (scalar(@matches) == 1 && ($self->{launchsingle} || $len > 0)) {
     $self->launch(@matches[0]);
   } else {
     $self->screen_cur($self->nrow,8+$len);
@@ -206,6 +208,7 @@ sub on_start {
   $self->{launcher} = $self->my_resource("launcher") ||
                       $self->x_resource("url-launcher") ||
                       "sensible-browser";
+  $self->{launchsingle} = ($self->my_resource("launchsingle") ne "false");
   $self->{descending} = ($self->my_resource("order") eq "descending");
   $self->{url_picker} = ();
 }
